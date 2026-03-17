@@ -3628,25 +3628,52 @@
 
         // ===== FORM PREFILL FROM CONFIGURATOR =====
         function prefillForm() {
-            const mappings = [
+            // Simple fields: copy value directly (options have matching values)
+            const simpleMappings = [
                 ['cfg-logo', 'form-logo'],
                 ['cfg-newsletter', 'form-newsletter'],
                 ['cfg-linkedin', 'form-linkedin'],
-                ['cfg-slot30-num', 'form-slot30'],
-                ['cfg-slot45-num', 'form-slot45'],
                 ['cfg-matching', 'form-matching'],
                 ['cfg-contacts', 'form-contacts'],
                 ['cfg-meetup', 'form-meetup'],
                 ['cfg-tables', 'form-tables']
             ];
 
-            mappings.forEach(([cfgId, formId]) => {
+            simpleMappings.forEach(([cfgId, formId]) => {
                 const cfgEl = document.getElementById(cfgId);
                 const formEl = document.getElementById(formId);
                 if (cfgEl && formEl) {
-                    formEl.selectedIndex = cfgEl.selectedIndex;
+                    formEl.value = cfgEl.value;
                 }
             });
+
+            // Slot 30min: configurator uses (num × pricePerSlot), form uses total cost directly
+            const slot30Num = parseInt(document.getElementById('cfg-slot30-num').value) || 0;
+            const slot30Price = slot30Num > 0
+                ? (parseInt(document.querySelector('input[name="slot30type"]:checked').value) || 400)
+                : 0;
+            const slot30Total = slot30Num * slot30Price;
+            const form30El = document.getElementById('form-slot30');
+            for (let i = 0; i < form30El.options.length; i++) {
+                if (parseInt(form30El.options[i].value) === slot30Total) {
+                    form30El.selectedIndex = i;
+                    break;
+                }
+            }
+
+            // Slot 45min: same logic
+            const slot45Num = parseInt(document.getElementById('cfg-slot45-num').value) || 0;
+            const slot45Price = slot45Num > 0
+                ? (parseInt(document.querySelector('input[name="slot45type"]:checked').value) || 600)
+                : 0;
+            const slot45Total = slot45Num * slot45Price;
+            const form45El = document.getElementById('form-slot45');
+            for (let i = 0; i < form45El.options.length; i++) {
+                if (parseInt(form45El.options[i].value) === slot45Total) {
+                    form45El.selectedIndex = i;
+                    break;
+                }
+            }
 
             // Re-calculate the form total after pre-filling to sync
             updateTotal('form');
